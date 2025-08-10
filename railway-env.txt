@@ -1,0 +1,12 @@
+# Railway Environment Variables
+# Copy these to your Railway dashboard Variables section
+
+AUTH_TOKEN=quickpact_supersecret_token_2025
+MY_NUMBER=919876543210
+
+# Instructions:
+# 1. Go to Railway dashboard: https://railway.com/project/033bba09-5ec6-41bd-9c06-6ab44b9ffecd
+# 2. Click on your service
+# 3. Go to "Variables" tab
+# 4. Add each variable above (name=value)
+# 5. Service will automatically redeploy

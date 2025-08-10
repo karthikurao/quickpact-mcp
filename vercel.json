@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "functions": {
+    "quickpact_mcp_server.py": {
+      "runtime": "python3.9"
+    }
+  },
+  "routes": [
+    {
+      "src": "/mcp/(.*)",
+      "dest": "/quickpact_mcp_server.py"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/quickpact_mcp_server.py"
+    }
+  ],
+  "env": {
+    "QUICKPACT_AUTH_TOKEN": "quickpact_supersecret_token_2025",
+    "MY_NUMBER": "919876543210"
+  }
+}

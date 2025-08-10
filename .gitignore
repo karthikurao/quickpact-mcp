@@ -85,3 +85,4 @@ node_modules/
 # Temporary files
 tmp/
 temp/
+.vercel
