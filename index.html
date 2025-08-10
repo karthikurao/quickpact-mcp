@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickPact MCP Server - Micro Agreement Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="gradient-bg text-white">
+        <div class="container mx-auto px-4 py-16 text-center">
+            <h1 class="text-5xl font-bold mb-4">QuickPact 🤝</h1>
+            <p class="text-xl mb-8 opacity-90">MCP Server for Micro-Agreements</p>
+            <p class="text-lg opacity-80">Built for Puch AI Hackathon 2025</p>
+        </div>
+    </header>
+
+    <!-- Features Section -->
+    <section class="container mx-auto px-4 py-16">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">AI-Powered Agreement Creation</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">
+                Transform natural language into structured micro-agreements. Perfect for freelancers, 
+                small businesses, and quick handshake deals.
+            </p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8 mb-16">
+            <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                <div class="text-4xl mb-4">✍️</div>
+                <h3 class="text-xl font-semibold mb-3">Natural Language Input</h3>
+                <p class="text-gray-600">"I'll design a logo by Friday, you'll pay ₹2000"</p>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                <div class="text-4xl mb-4">🤖</div>
+                <h3 class="text-xl font-semibold mb-3">AI Processing</h3>
+                <p class="text-gray-600">Extracts parties, payments, deadlines automatically</p>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                <div class="text-4xl mb-4">🔒</div>
+                <h3 class="text-xl font-semibold mb-3">Digital Signatures</h3>
+                <p class="text-gray-600">Timestamped, secure, and legally binding</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- MCP Tools Section -->
+    <section class="bg-gray-100 py-16">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">Available MCP Tools</h2>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-white rounded-lg p-6 border-l-4 border-blue-500">
+                    <h4 class="font-bold text-blue-600 mb-2">create_agreement</h4>
+                    <p class="text-gray-600 text-sm mb-3">Create structured agreements from natural language</p>
+                    <code class="text-xs bg-gray-100 px-2 py-1 rounded block">
+                        party1, party2, terms, deadline
+                    </code>
+                </div>
+                
+                <div class="bg-white rounded-lg p-6 border-l-4 border-green-500">
+                    <h4 class="font-bold text-green-600 mb-2">sign_agreement</h4>
+                    <p class="text-gray-600 text-sm mb-3">Add digital signatures with timestamps</p>
+                    <code class="text-xs bg-gray-100 px-2 py-1 rounded block">
+                        agreement_id, signer_name, role
+                    </code>
+                </div>
+                
+                <div class="bg-white rounded-lg p-6 border-l-4 border-purple-500">
+                    <h4 class="font-bold text-purple-600 mb-2">get_agreement</h4>
+                    <p class="text-gray-600 text-sm mb-3">Retrieve agreement details by ID</p>
+                    <code class="text-xs bg-gray-100 px-2 py-1 rounded block">
+                        agreement_id
+                    </code>
+                </div>
+                
+                <div class="bg-white rounded-lg p-6 border-l-4 border-orange-500">
+                    <h4 class="font-bold text-orange-600 mb-2">list_agreements</h4>
+                    <p class="text-gray-600 text-sm mb-3">List all agreements with filters</p>
+                    <code class="text-xs bg-gray-100 px-2 py-1 rounded block">
+                        filter_party, filter_status
+                    </code>
+                </div>
+                
+                <div class="bg-white rounded-lg p-6 border-l-4 border-red-500">
+                    <h4 class="font-bold text-red-600 mb-2">validate</h4>
+                    <p class="text-gray-600 text-sm mb-3">Required for Puch AI authentication</p>
+                    <code class="text-xs bg-gray-100 px-2 py-1 rounded block">
+                        Returns: phone_number
+                    </code>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Section -->
+    <section class="container mx-auto px-4 py-16">
+        <div class="bg-white rounded-lg shadow-lg p-8">
+            <h2 class="text-3xl font-bold text-center mb-8">Try It in Puch AI</h2>
+            
+            <div class="max-w-4xl mx-auto">
+                <div class="bg-gray-900 text-green-400 rounded-lg p-6 font-mono text-sm mb-6">
+                    <div class="mb-4">
+                        <span class="text-blue-400">user@puch:</span> /mcp connect https://quickpact-mcp.railway.app/mcp YOUR_TOKEN
+                    </div>
+                    <div class="mb-4">
+                        <span class="text-green-400">✓</span> Connected to QuickPact MCP Server
+                    </div>
+                    <div class="mb-4">
+                        <span class="text-blue-400">user@puch:</span> Create an agreement where I design a logo by Friday and they pay ₹2000
+                    </div>
+                    <div class="text-gray-300">
+                        🤖 Creating agreement...<br>
+                        ✅ Agreement qp_abc123 created!<br>
+                        📋 Parties: You ↔ Client<br>
+                        💰 Payment: ₹2000<br>
+                        📅 Deadline: Friday<br>
+                        🔗 Share: https://quickpact.app/agreement/qp_abc123
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <a href="https://github.com/yourusername/quickpact-mcp" 
+                       class="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-8 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity inline-block">
+                        View Source Code
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Hackathon Info -->
+    <section class="gradient-bg text-white py-16">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-3xl font-bold mb-6">Hackathon Submission</h2>
+            <div class="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+                <div>
+                    <div class="text-4xl mb-4">🎯</div>
+                    <h3 class="text-xl font-semibold mb-2">Phase 1: Build</h3>
+                    <p class="opacity-90">MCP server with agreement tools for Puch AI</p>
+                </div>
+                <div>
+                    <div class="text-4xl mb-4">📈</div>
+                    <h3 class="text-xl font-semibold mb-2">Phase 2: Traction</h3>
+                    <p class="opacity-90">Get real users creating actual agreements</p>
+                </div>
+                <div>
+                    <div class="text-4xl mb-4">🏆</div>
+                    <h3 class="text-xl font-semibold mb-2">Goal: Impact</h3>
+                    <p class="opacity-90">Make micro-agreements accessible to everyone</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-8">
+        <div class="container mx-auto px-4 text-center">
+            <p>&copy; 2025 QuickPact Team. Built for Puch AI Hackathon.</p>
+            <p class="text-gray-400 mt-2">Making agreements as easy as a handshake</p>
+        </div>
+    </footer>
+</body>
+</html>
