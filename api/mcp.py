@@ -4,18 +4,16 @@ Micro Agreement Creator for Puch AI Integration
 """
 
 import os
-import sys
 import json
 import asyncio
 from datetime import datetime
-from typing import Dict, List, Any, Optional
+from flask import Flask, request, jsonify
 
-# Set environment variables for compatibility
+# Set environment variables
 os.environ['QUICKPACT_AUTH_TOKEN'] = os.environ.get('QUICKPACT_AUTH_TOKEN', 'quickpact_supersecret_token_2025')
 os.environ['MY_NUMBER'] = os.environ.get('MY_NUMBER', '919876543210')
 
-# Add parent directory to path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+app = Flask(__name__)
 
 # MCP Protocol handler
 async def handle_mcp_request(request_data: dict) -> dict:
@@ -148,24 +146,12 @@ async def handle_mcp_request(request_data: dict) -> dict:
                 description = tool_args.get('description', '')
                 agreement_id = f"qp_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
                 
-                # Simple parsing
-                parties = ["Party A", "Party B"]
-                if "pay" in description.lower():
-                    amount_start = description.lower().find("₹")
-                    if amount_start == -1:
-                        amount_start = description.lower().find("rs")
-                    payment = "Amount specified in description"
-                else:
-                    payment = "No payment specified"
-                
                 agreement = {
                     "id": agreement_id,
                     "description": description,
-                    "parties": parties,
-                    "payment": payment,
+                    "parties": ["Party A", "Party B"],
                     "status": "draft",
                     "created_at": datetime.now().isoformat(),
-                    "signed_by": []
                 }
                 
                 return {
@@ -175,7 +161,7 @@ async def handle_mcp_request(request_data: dict) -> dict:
                         "content": [
                             {
                                 "type": "text",
-                                "text": f"Agreement created successfully!\n\n**Agreement ID**: {agreement_id}\n**Description**: {description}\n**Status**: Draft\n**Parties**: {', '.join(parties)}\n\nUse `sign_agreement` to add digital signatures."
+                                "text": f"Agreement created successfully!\n\n**Agreement ID**: {agreement_id}\n**Description**: {description}\n**Status**: Draft\n\nUse `sign_agreement` to add digital signatures."
                             }
                         ]
                     }
@@ -193,36 +179,6 @@ async def handle_mcp_request(request_data: dict) -> dict:
                             {
                                 "type": "text",
                                 "text": f"Agreement {agreement_id} signed by {signer_phone} at {datetime.now().isoformat()}"
-                            }
-                        ]
-                    }
-                }
-            
-            elif tool_name == 'get_agreement':
-                agreement_id = tool_args.get('agreement_id', '')
-                
-                return {
-                    "jsonrpc": "2.0",
-                    "id": request_id,
-                    "result": {
-                        "content": [
-                            {
-                                "type": "text",
-                                "text": f"Agreement {agreement_id} details would be shown here (demo mode)"
-                            }
-                        ]
-                    }
-                }
-            
-            elif tool_name == 'list_agreements':
-                return {
-                    "jsonrpc": "2.0",
-                    "id": request_id,
-                    "result": {
-                        "content": [
-                            {
-                                "type": "text",
-                                "text": "Demo agreements list:\n1. qp_demo_001 - Logo design agreement (Draft)\n2. qp_demo_002 - Payment for services (Signed)"
                             }
                         ]
                     }
@@ -258,24 +214,21 @@ async def handle_mcp_request(request_data: dict) -> dict:
             }
         }
 
-def handler(request):
-    """Main Vercel serverless function handler"""
+@app.route('/', methods=['GET', 'POST', 'OPTIONS'])
+def handler():
+    """Main Flask handler"""
     
     # Handle CORS
     if request.method == 'OPTIONS':
-        return {
-            'statusCode': 200,
-            'headers': {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-                'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-            },
-            'body': ''
-        }
+        response = jsonify({})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+        return response
     
     # Handle GET requests (health check)
     if request.method == 'GET':
-        response = {
+        response_data = {
             "name": "QuickPact MCP Server - Micro Agreement Creator",
             "version": "1.0.0",
             "status": "healthy",
@@ -286,54 +239,33 @@ def handler(request):
             "endpoint": "/api/mcp"
         }
         
-        return {
-            'statusCode': 200,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-            },
-            'body': json.dumps(response, indent=2)
-        }
+        response = jsonify(response_data)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
     
     # Handle POST requests (MCP protocol)
     if request.method == 'POST':
         try:
             # Check authorization
-            auth_header = request.headers.get('authorization', '')
+            auth_header = request.headers.get('Authorization', '')
             expected_token = os.environ.get('QUICKPACT_AUTH_TOKEN', 'quickpact_supersecret_token_2025')
             
             if not auth_header.startswith('Bearer ') or auth_header[7:] != expected_token:
-                return {
-                    'statusCode': 401,
-                    'headers': {
-                        'Content-Type': 'application/json',
-                        'Access-Control-Allow-Origin': '*',
-                    },
-                    'body': json.dumps({"error": "Unauthorized"})
-                }
+                response = jsonify({"error": "Unauthorized"})
+                response.headers.add('Access-Control-Allow-Origin', '*')
+                response.status_code = 401
+                return response
             
             # Parse request body
             try:
-                if hasattr(request, 'body'):
-                    body = request.body
-                elif hasattr(request, 'get_body'):
-                    body = request.get_body()
-                else:
-                    body = request.data if hasattr(request, 'data') else '{}'
-                
-                if isinstance(body, bytes):
-                    body = body.decode('utf-8')
-                
-                request_data = json.loads(body)
-            except (json.JSONDecodeError, AttributeError) as e:
-                return {
-                    'statusCode': 400,
-                    'headers': {
-                        'Content-Type': 'application/json',
-                        'Access-Control-Allow-Origin': '*',
-                    },
-                    'body': json.dumps({"error": "Invalid JSON"})
-                }
+                request_data = request.get_json()
+                if not request_data:
+                    raise ValueError("No JSON data")
+            except Exception as e:
+                response = jsonify({"error": "Invalid JSON"})
+                response.headers.add('Access-Control-Allow-Origin', '*')
+                response.status_code = 400
+                return response
             
             # Handle MCP request
             loop = asyncio.new_event_loop()
@@ -341,38 +273,41 @@ def handler(request):
             result = loop.run_until_complete(handle_mcp_request(request_data))
             loop.close()
             
-            return {
-                'statusCode': 200,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*',
-                },
-                'body': json.dumps(result)
-            }
+            response = jsonify(result)
+            response.headers.add('Access-Control-Allow-Origin', '*')
+            return response
             
         except Exception as e:
-            return {
-                'statusCode': 500,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*',
-                },
-                'body': json.dumps({
-                    "jsonrpc": "2.0",
-                    "id": 1,
-                    "error": {
-                        "code": -32603,
-                        "message": f"Internal server error: {str(e)}"
-                    }
-                })
+            error_response = {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "error": {
+                    "code": -32603,
+                    "message": f"Internal server error: {str(e)}"
+                }
             }
+            response = jsonify(error_response)
+            response.headers.add('Access-Control-Allow-Origin', '*')
+            response.status_code = 500
+            return response
     
     # Unsupported method
-    return {
-        'statusCode': 405,
-        'headers': {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-        },
-        'body': json.dumps({"error": "Method not allowed"})
-    }
+    response = jsonify({"error": "Method not allowed"})
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.status_code = 405
+    return response
+
+# Vercel handler
+def handler_func(request, context=None):
+    with app.test_request_context(
+        path=request.path,
+        method=request.method,
+        headers=dict(request.headers),
+        data=request.body if hasattr(request, 'body') else None
+    ):
+        response = app.full_dispatch_request()
+        return {
+            'statusCode': response.status_code,
+            'headers': dict(response.headers),
+            'body': response.get_data(as_text=True)
+        }
