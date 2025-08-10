@@ -7,9 +7,16 @@ Run this to test the server endpoints locally
 import asyncio
 import httpx
 import json
+import os
+from dotenv import load_dotenv
 
-BASE_URL = "http://localhost:8086"
-AUTH_TOKEN = "quickpact_supersecret_token_2025"
+# Load environment variables
+load_dotenv()
+
+# Configuration
+PORT = int(os.environ.get("PORT", 8086))
+BASE_URL = f"http://localhost:{PORT}"
+AUTH_TOKEN = os.environ.get("AUTH_TOKEN", "quickpact_supersecret_token_2025")
 
 async def test_mcp_server():
     """Test the MCP server endpoints"""

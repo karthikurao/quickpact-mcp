@@ -4,6 +4,7 @@ import uuid
 from datetime import datetime
 from typing import Annotated
 import os
+import logging
 from dotenv import load_dotenv
 from fastmcp import FastMCP
 from fastmcp.server.auth.providers.bearer import BearerAuthProvider, RSAKeyPair
@@ -12,6 +13,10 @@ from mcp.server.auth.provider import AccessToken
 from mcp.types import TextContent, INVALID_PARAMS, INTERNAL_ERROR
 from pydantic import BaseModel, Field
 import re
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # --- Load environment variables ---
 load_dotenv()
@@ -159,6 +164,27 @@ async def create_agreement(
     """Create a micro-agreement between two parties with AI-powered parsing"""
     
     try:
+        # Input validation
+        if not terms or len(terms.strip()) < 10:
+            raise McpError(ErrorData(code=INVALID_PARAMS, message="Agreement terms must be at least 10 characters long"))
+        
+        if not party1 or not party1.strip():
+            party1 = "Party 1"
+        else:
+            party1 = party1.strip()
+            
+        if not party2 or not party2.strip():
+            party2 = "Party 2"
+        else:
+            party2 = party2.strip()
+            
+        if not deadline or not deadline.strip():
+            deadline = "Not specified"
+        else:
+            deadline = deadline.strip()
+        
+        logger.info(f"Creating agreement between {party1} and {party2}")
+        
         # Generate unique agreement ID
         agreement_id = f"qp_{uuid.uuid4().hex[:8]}"
         
@@ -243,6 +269,21 @@ async def sign_agreement(
     """Sign an existing agreement with digital signature"""
     
     try:
+        # Input validation
+        if not agreement_id or not agreement_id.strip():
+            raise McpError(ErrorData(code=INVALID_PARAMS, message="Agreement ID is required"))
+            
+        if not signer_name or len(signer_name.strip()) < 2:
+            raise McpError(ErrorData(code=INVALID_PARAMS, message="Signer name must be at least 2 characters long"))
+            
+        if signer_role not in ["party1", "party2", "witness"]:
+            raise McpError(ErrorData(code=INVALID_PARAMS, message="Signer role must be 'party1', 'party2', or 'witness'"))
+        
+        signer_name = signer_name.strip()
+        agreement_id = agreement_id.strip()
+        
+        logger.info(f"Signing agreement {agreement_id} by {signer_name} as {signer_role}")
+        
         # Check if agreement exists
         if agreement_id not in agreements_db:
             raise McpError(ErrorData(code=INVALID_PARAMS, message=f"Agreement '{agreement_id}' not found"))
@@ -451,11 +492,31 @@ This action cannot be undone.
 
 # --- Run MCP Server ---
 async def main():
-    print("🚀 QuickPact MCP Server starting on http://0.0.0.0:8086")
-    print("🎯 Available tools: create_agreement, sign_agreement, get_agreement, list_agreements")
-    print("🔑 Use bearer token authentication with Puch AI")
-    print("📱 Phone validation:", MY_NUMBER)
-    await mcp.run_async("streamable-http", host="0.0.0.0", port=8086)
+    try:
+        # Get port from environment variable (Railway/Vercel) or default to 8086
+        port = int(os.environ.get("PORT", 8086))
+        host = os.environ.get("HOST", "0.0.0.0")
+        
+        logger.info("🚀 QuickPact MCP Server starting")
+        logger.info(f"🌐 Server URL: http://{host}:{port}")
+        logger.info("🎯 Available tools: create_agreement, sign_agreement, get_agreement, list_agreements, validate")
+        logger.info("� Use bearer token authentication with Puch AI")
+        logger.info(f"📱 Phone validation: {MY_NUMBER}")
+        logger.info("🔗 MCP Endpoint: /mcp")
+        
+        print("�🚀 QuickPact MCP Server starting")
+        print(f"🌐 Server URL: http://{host}:{port}")
+        print("🎯 Available tools: create_agreement, sign_agreement, get_agreement, list_agreements, validate")
+        print("🔑 Use bearer token authentication with Puch AI")
+        print("📱 Phone validation:", MY_NUMBER)
+        print("🔗 MCP Endpoint: /mcp")
+        
+        await mcp.run_async("streamable-http", host=host, port=port)
+        
+    except Exception as e:
+        logger.error(f"❌ Failed to start server: {e}")
+        print(f"❌ Failed to start server: {e}")
+        raise
 
 if __name__ == "__main__":
     asyncio.run(main())
